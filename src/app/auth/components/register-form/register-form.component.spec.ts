@@ -1,34 +1,57 @@
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  fakeAsync,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 
-import { RegisterFormComponent } from './register-form.component';
-import { UsersService } from './../../../services/user.service';
+import { Router } from '@angular/router';
+import {
+  asyncData,
+  asyncError,
+  clickElement,
+  getText,
+  mockObservable,
+  query,
+  setCheckboxValue,
+  setInputValue,
+} from 'src/testing';
 import { generateOneUser } from './../../../models/user.mock';
-import { asyncData, getText, mockObservable, query, queryById, setInputValue, setCheckboxValue, clickEvent, clickElement, asyncError } from 'src/testing';
+import { UsersService } from './../../../services/user.service';
+import { RegisterFormComponent } from './register-form.component';
 
 describe('RegisterFormComponent', () => {
   let component: RegisterFormComponent;
   let fixture: ComponentFixture<RegisterFormComponent>;
   let userService: jasmine.SpyObj<UsersService>;
+  let router: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('UsersService', ['create', 'isAvailableByEmail']);
+    const spy = jasmine.createSpyObj('UsersService', [
+      'create',
+      'isAvailableByEmail',
+    ]);
+    const routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 
     await TestBed.configureTestingModule({
-      declarations: [ RegisterFormComponent ],
-      imports: [ ReactiveFormsModule ],
+      declarations: [RegisterFormComponent],
+      imports: [ReactiveFormsModule],
       providers: [
-        { provide:  UsersService, useValue: spy },
-      ]
-    })
-    .compileComponents();
+        { provide: UsersService, useValue: spy },
+        { provide: Router, useValue: routerSpy },
+      ],
+    }).compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(RegisterFormComponent);
     userService = TestBed.inject(UsersService) as jasmine.SpyObj<UsersService>;
+    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     component = fixture.componentInstance;
-    userService.isAvailableByEmail.and.returnValue(mockObservable({isAvailable: true}));
+    userService.isAvailableByEmail.and.returnValue(
+      mockObservable({ isAvailable: true })
+    );
     fixture.detectChanges();
   });
 
@@ -38,7 +61,9 @@ describe('RegisterFormComponent', () => {
 
   it('should the emailField be invalid', () => {
     component.emailField?.setValue('esto no es un correo');
-    expect(component.emailField?.invalid).withContext('wrong email').toBeTruthy();
+    expect(component.emailField?.invalid)
+      .withContext('wrong email')
+      .toBeTruthy();
 
     component.emailField?.setValue('');
     expect(component.emailField?.invalid).withContext('empty').toBeTruthy();
@@ -52,7 +77,9 @@ describe('RegisterFormComponent', () => {
     expect(component.passwordField?.invalid).withContext('12345').toBeTruthy();
 
     component.passwordField?.setValue('asasaasasdsdsd');
-    expect(component.passwordField?.invalid).withContext('without number').toBeTruthy();
+    expect(component.passwordField?.invalid)
+      .withContext('without number')
+      .toBeTruthy();
 
     component.passwordField?.setValue('asas1aasasdsdsd');
     expect(component.passwordField?.valid).withContext('rigth').toBeTruthy();
@@ -64,20 +91,22 @@ describe('RegisterFormComponent', () => {
       email: 'nico@gmil.com',
       password: '12121212',
       confirPassword: '12121212',
-      checkTerms: false
+      checkTerms: false,
     });
     expect(component.form.invalid).toBeTruthy();
-  })
+  });
 
   it('should the emailField be invalid from UI', () => {
     const inputDe = query(fixture, 'input#email');
     const inputEl: HTMLInputElement = inputDe.nativeElement;
 
-    inputEl.value = "esto no es un correo";
+    inputEl.value = 'esto no es un correo';
     inputEl.dispatchEvent(new Event('input'));
     inputEl.dispatchEvent(new Event('blur'));
     fixture.detectChanges();
-    expect(component.emailField?.invalid).withContext('wrong email').toBeTruthy();
+    expect(component.emailField?.invalid)
+      .withContext('wrong email')
+      .toBeTruthy();
 
     const textError = getText(fixture, 'emailField-email');
     expect(textError).toContain("It's not a email");
@@ -86,7 +115,9 @@ describe('RegisterFormComponent', () => {
   it('should the emailField be invalid from UI with setInputValue', () => {
     setInputValue(fixture, 'input#email', 'esto no es un correo');
     fixture.detectChanges();
-    expect(component.emailField?.invalid).withContext('wrong email').toBeTruthy();
+    expect(component.emailField?.invalid)
+      .withContext('wrong email')
+      .toBeTruthy();
 
     const textError = getText(fixture, 'emailField-email');
     expect(textError).toContain("It's not a email");
@@ -98,7 +129,7 @@ describe('RegisterFormComponent', () => {
       email: 'nico@gmil.com',
       password: '12121212',
       confirmPassword: '12121212',
-      checkTerms: true
+      checkTerms: true,
     });
     const mockUser = generateOneUser();
     userService.create.and.returnValue(mockObservable(mockUser));
@@ -106,7 +137,7 @@ describe('RegisterFormComponent', () => {
     component.register(new Event('submit'));
     expect(component.form.valid).toBeTruthy();
     expect(userService.create).toHaveBeenCalled();
-  })
+  });
 
   it('should send the form successfully from UI', fakeAsync(() => {
     setInputValue(fixture, 'input#name', 'Nico');
@@ -123,11 +154,12 @@ describe('RegisterFormComponent', () => {
     fixture.detectChanges();
     expect(component.status).toEqual('loading');
 
-    tick();  // exec pending tasks
+    tick(); // exec pending tasks
     fixture.detectChanges();
     expect(component.status).toEqual('success');
     expect(component.form.valid).toBeTruthy();
     expect(userService.create).toHaveBeenCalled();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/login');
   }));
 
   it('should send the form successfully and "loading" => "success"', fakeAsync(() => {
@@ -136,7 +168,7 @@ describe('RegisterFormComponent', () => {
       email: 'nico@gmil.com',
       password: '12121212',
       confirmPassword: '12121212',
-      checkTerms: true
+      checkTerms: true,
     });
     const mockUser = generateOneUser();
     userService.create.and.returnValue(asyncData(mockUser));
@@ -144,7 +176,7 @@ describe('RegisterFormComponent', () => {
     component.register(new Event('submit'));
     expect(component.status).toEqual('loading');
 
-    tick();  // exec pending tasks
+    tick(); // exec pending tasks
     fixture.detectChanges();
     expect(component.status).toEqual('success');
     expect(component.form.valid).toBeTruthy();
@@ -166,7 +198,7 @@ describe('RegisterFormComponent', () => {
     fixture.detectChanges();
     expect(component.status).toEqual('loading');
 
-    tick();  // exec pending tasks
+    tick(); // exec pending tasks
     fixture.detectChanges();
     expect(component.status).toEqual('error');
     expect(component.form.valid).toBeTruthy();
@@ -175,13 +207,17 @@ describe('RegisterFormComponent', () => {
 
   it('should show error with an email invalid', () => {
     // Arrange
-    userService.isAvailableByEmail.and.returnValue(mockObservable({isAvailable: false}));
+    userService.isAvailableByEmail.and.returnValue(
+      mockObservable({ isAvailable: false })
+    );
     setInputValue(fixture, 'input#email', 'nico@mail.com');
     // Act
     fixture.detectChanges();
     // Assert
     expect(component.emailField?.invalid).toBeTrue();
-    expect(userService.isAvailableByEmail).toHaveBeenCalledWith('nico@mail.com');
+    expect(userService.isAvailableByEmail).toHaveBeenCalledWith(
+      'nico@mail.com'
+    );
     // reto
     const errorMsg = getText(fixture, 'emailField-not-available');
     expect(errorMsg).toContain('The email is already registered');

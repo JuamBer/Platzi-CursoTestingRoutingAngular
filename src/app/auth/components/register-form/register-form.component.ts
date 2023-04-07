@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 
 import { MyValidators } from './../../../utils/validators';
 
+import { Router } from '@angular/router';
 import { UsersService } from './../../../services/user.service';
 
 @Component({
@@ -14,8 +15,19 @@ export class RegisterFormComponent {
   form = this.fb.group(
     {
       name: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email], [MyValidators.validateEmailAsync(this.usersService)]],
-      password: ['', [Validators.required, Validators.minLength(6), MyValidators.validPassword]],
+      email: [
+        '',
+        [Validators.required, Validators.email],
+        [MyValidators.validateEmailAsync(this.usersService)],
+      ],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6),
+          MyValidators.validPassword,
+        ],
+      ],
       confirmPassword: ['', [Validators.required]],
       checkTerms: [false, [Validators.requiredTrue]],
     },
@@ -27,7 +39,8 @@ export class RegisterFormComponent {
 
   constructor(
     private fb: FormBuilder,
-    private usersService: UsersService
+    private usersService: UsersService,
+    private router: Router
   ) {}
 
   register(event: Event) {
@@ -35,17 +48,17 @@ export class RegisterFormComponent {
     if (this.form.valid) {
       this.status = 'loading';
       const value = this.form.value;
-      this.usersService.create(value)
-      .subscribe({
+      this.usersService.create(value).subscribe({
         next: (rta) => {
           // redirect
           // alert
           this.status = 'success';
+          this.router.navigateByUrl('/login');
         },
         error: (error) => {
           // redict
           this.status = 'error';
-        }
+        },
       });
     } else {
       this.form.markAllAsTouched();
