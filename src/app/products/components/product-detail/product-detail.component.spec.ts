@@ -4,7 +4,7 @@ import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { generateOneProduct } from 'src/app/models/product.mock';
 import { ProductsService } from 'src/app/services/product.service';
-import { ActivatedRouteStub, mockObservable } from 'src/testing';
+import { ActivatedRouteStub, getText, mockObservable } from 'src/testing';
 import { ProductDetailComponent } from './product-detail.component';
 
 describe('ProductDetailComponent', () => {
@@ -47,15 +47,32 @@ describe('ProductDetailComponent', () => {
     ) as jasmine.SpyObj<ProductsService>;
     location = TestBed.inject(Location) as jasmine.SpyObj<Location>;
     component = fixture.componentInstance;
+  });
 
+  it('should create', () => {
     const productId = '1';
     route.setParamMap({ id: productId });
     const productMock = { ...generateOneProduct(), id: productId };
     productsService.getOne.and.returnValue(mockObservable(productMock));
     fixture.detectChanges();
+    expect(component).toBeTruthy();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should show the product in the view', () => {
+    const productId = '2';
+    route.setParamMap({ id: productId });
+
+    const productMock = {
+      ...generateOneProduct(),
+      id: productId,
+    };
+    productsService.getOne.and.returnValue(mockObservable(productMock));
+
+    fixture.detectChanges(); // ngOnInit
+    const titleText = getText(fixture, 'title');
+    const priceText = getText(fixture, 'price');
+    expect(titleText).toContain(productMock.title);
+    expect(priceText).toContain(productMock.price);
+    expect(productsService.getOne).toHaveBeenCalledWith(productId);
   });
 });
