@@ -23,7 +23,12 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule],
-      declarations: [AppComponent, RouterLinkDirectiveStub],
+      declarations: [
+        AppComponent,
+        RouterLinkDirectiveStub,
+        FooterComponent,
+        BannerComponent,
+      ],
       // schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
   });
