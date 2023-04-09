@@ -1,4 +1,3 @@
-import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
@@ -8,37 +7,9 @@ import {
 import { Router, RouterLinkWithHref } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { clickElement, query, queryAllByDirective } from 'src/testing';
+import { routes } from './app-routing.module';
 import { AppComponent } from './app.component';
-
-@Component({
-  selector: 'app-people',
-})
-class PeopleComponent {}
-
-@Component({
-  selector: 'app-others',
-})
-class OthersComponent {}
-
-@Component({
-  selector: 'app-pico-preview',
-})
-class PicoPreviewComponent {}
-
-const routes = [
-  {
-    path: 'pico-preview',
-    component: PicoPreviewComponent,
-  },
-  {
-    path: 'people',
-    component: PeopleComponent,
-  },
-  {
-    path: 'others',
-    component: OthersComponent,
-  },
-];
+import { AppModule } from './app.module';
 
 describe('App Integration test', () => {
   let fixture: ComponentFixture<AppComponent>;
@@ -47,14 +18,7 @@ describe('App Integration test', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RouterTestingModule.withRoutes(routes)],
-      declarations: [
-        AppComponent,
-        PeopleComponent,
-        PicoPreviewComponent,
-        OthersComponent,
-      ],
-      schemas: [NO_ERRORS_SCHEMA],
+      imports: [AppModule, RouterTestingModule.withRoutes(routes)],
     }).compileComponents();
   });
 
@@ -87,6 +51,16 @@ describe('App Integration test', () => {
 
     expect(router.url).toEqual('/others');
     const element = query(fixture, 'app-others');
+    expect(element).not.toBeNull();
+  }));
+
+  it('should render PicoComponent when clicked', fakeAsync(() => {
+    clickElement(fixture, 'pico-link', true);
+    tick(); // wait while nav...
+    fixture.detectChanges(); // ngOnInit - OthersComponent
+
+    expect(router.url).toEqual('/pico-preview');
+    const element = query(fixture, 'app-pico-preview');
     expect(element).not.toBeNull();
   }));
 });
