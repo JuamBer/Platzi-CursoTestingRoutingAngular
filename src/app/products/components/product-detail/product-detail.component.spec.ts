@@ -1,4 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
@@ -83,4 +88,28 @@ describe('ProductDetailComponent', () => {
     fixture.detectChanges(); // ngOnInit
     expect(location.back).toHaveBeenCalled();
   });
+
+  it('should change status loading => success', fakeAsync(() => {
+    const productId = '2';
+    route.setParamMap({ id: productId });
+
+    const productMock = {
+      ...generateOneProduct(),
+      id: productId,
+    };
+    productsService.getOne.and.returnValue(mockObservable(productMock));
+    fixture.detectChanges(); // ngOnInit
+
+    // expect(component.status).toEqual('loading');
+
+    tick();
+    fixture.detectChanges();
+    expect(component.status).toEqual('success');
+
+    const titleText = getText(fixture, 'title');
+    const priceText = getText(fixture, 'price');
+    expect(titleText).toContain(productMock.title);
+    expect(priceText).toContain(productMock.price);
+    expect(productsService.getOne).toHaveBeenCalledWith(productId);
+  }));
 });
