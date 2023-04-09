@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { OthersComponent } from './components/others/others.component';
 import { PeopleComponent } from './components/people/people.component';
 import { PicoPreviewComponent } from './components/pico-preview/pico-preview.component';
+import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -17,6 +18,7 @@ export const routes: Routes = [
   {
     path: 'others',
     component: OthersComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: 'auth',
