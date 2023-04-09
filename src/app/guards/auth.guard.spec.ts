@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import {
   fakeActivatedStateSnapshot,
+  fakeParamMap,
   fakeRouterStateSnapshot,
   mockObservable,
 } from 'src/testing';
@@ -39,7 +40,11 @@ describe('Test for AuthGuard', () => {
   });
 
   it('should return true with session', (doneFn) => {
-    const activatedRoute = fakeActivatedStateSnapshot({});
+    const activatedRoute = fakeActivatedStateSnapshot({
+      paramMap: fakeParamMap({
+        idProduct: '1',
+      }),
+    });
     const routerState = fakeRouterStateSnapshot({});
     const userMock = generateOneUser();
     console.log(authService);
@@ -52,7 +57,26 @@ describe('Test for AuthGuard', () => {
   });
 
   it('should return true without session', (doneFn) => {
-    const activatedRoute = fakeActivatedStateSnapshot({});
+    const activatedRoute = fakeActivatedStateSnapshot({
+      paramMap: fakeParamMap({
+        idProduct: '1',
+      }),
+    });
+    const routerState = fakeRouterStateSnapshot({});
+    authService.getUser.and.returnValue(mockObservable(null));
+    guard.canActivate(activatedRoute, routerState).subscribe((rta) => {
+      expect(rta).toBeFalse();
+      expect(router.navigate).toHaveBeenCalledWith(['/home']);
+      doneFn();
+    });
+  });
+
+  it('should return false with idProduct 10', (doneFn) => {
+    const activatedRoute = fakeActivatedStateSnapshot({
+      paramMap: fakeParamMap({
+        idProduct: '1',
+      }),
+    });
     const routerState = fakeRouterStateSnapshot({});
     authService.getUser.and.returnValue(mockObservable(null));
     guard.canActivate(activatedRoute, routerState).subscribe((rta) => {
