@@ -13,6 +13,7 @@ import { ProductsService } from '../../../services/product.service';
 export class ProductDetailComponent implements OnInit {
   product: Product | null = null;
   status: 'loading' | 'success' | 'error' | 'init' = 'init';
+  customerType: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -28,6 +29,10 @@ export class ProductDetailComponent implements OnInit {
       } else {
         this.goToBack();
       }
+    });
+
+    this.route.queryParamMap.subscribe((params) => {
+      this.customerType = params.get('type');
     });
   }
 

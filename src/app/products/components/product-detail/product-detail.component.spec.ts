@@ -112,4 +112,21 @@ describe('ProductDetailComponent', () => {
     expect(priceText).toContain(productMock.price);
     expect(productsService.getOne).toHaveBeenCalledWith(productId);
   }));
+
+  it('should typeCustomer be "customer"', () => {
+    // Arrange
+    const productId = '2';
+    route.setParamMap({ id: productId });
+    route.setQueryParamMap({ type: 'customer' });
+    const productMock = {
+      ...generateOneProduct(),
+      id: productId,
+    };
+    productsService.getOne.and.returnValue(mockObservable(productMock));
+    // Act
+    fixture.detectChanges(); // ngOnInit
+    // Assert
+    fixture.detectChanges();
+    expect(component.customerType).toEqual('customer');
+  });
 });

@@ -1,6 +1,7 @@
 <section class="container">
   <article>
     <a (click)="goToBack()">Back</a>
+    <h3>{{ customerType }}</h3>
     <div class="detail" *ngIf="product">
       <figure>
         <img data-testid="img" [src]="product.images[0]" alt="" />
